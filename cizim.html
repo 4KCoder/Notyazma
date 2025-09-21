@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Çizim Uygulaması - Tam Ekran</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #1e1e1e;
+    }
+
+    canvas {
+      display: block;
+      background-color: #111;
+      cursor: crosshair;
+    }
+
+    #toolbar {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(30, 30, 30, 0.8);
+      padding: 10px;
+      border-radius: 6px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    button {
+      padding: 6px 12px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button.active {
+      background-color: #007acc;
+    }
+
+    .color-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      cursor: pointer;
+    }
+
+    .color-btn.active {
+      border: 2px solid #007acc;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="toolbar">
+    <button id="penBtn" class="active">Kalem</button>
+    <button id="eraserBtn">Silgi</button>
+
+    <div style="margin-left: 10px;">
+      <span style="color: #ccc; font-size: 14px;">Renk:</span>
+      <button class="color-btn active" id="whiteColor" style="background-color: #ffffff;"></button>
+      <button class="color-btn" id="redColor" style="background-color: #ff0000;"></button>
+    </div>
+  </div>
+
+  <canvas id="drawingCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById("drawingCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const penBtn = document.getElementById("penBtn");
+    const eraserBtn = document.getElementById("eraserBtn");
+
+    const whiteColor = document.getElementById("whiteColor");
+    const redColor = document.getElementById("redColor");
+    const colorButtons = [whiteColor, redColor];
+
+    let isDrawing = false;
+    let currentTool = "pen";
+    let penColor = "#ffffff";
+    let penSize = 2;
+    let eraserSize = 20;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    canvas.addEventListener("mousedown", (e) => {
+      isDrawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.clientX, e.clientY);
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (!isDrawing) return;
+
+      if (currentTool === "pen") {
+        ctx.strokeStyle = penColor;
+        ctx.lineWidth = penSize;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.lineTo(e.clientX, e.clientY);
+        ctx.stroke();
+      } else if (currentTool === "eraser") {
+        ctx.clearRect(e.clientX - eraserSize / 2, e.clientY - eraserSize / 2, eraserSize, eraserSize);
+      }
+    });
+
+    canvas.addEventListener("mouseup", () => {
+      isDrawing = false;
+    });
+
+    penBtn.addEventListener("click", () => {
+      currentTool = "pen";
+      penBtn.classList.add("active");
+      eraserBtn.classList.remove("active");
+    });
+
+    eraserBtn.addEventListener("click", () => {
+      currentTool = "eraser";
+      eraserBtn.classList.add("active");
+      penBtn.classList.remove("active");
+    });
+
+    // Renk seçme işlemi
+    whiteColor.addEventListener("click", () => selectColor("#ffffff", whiteColor));
+    redColor.addEventListener("click", () => selectColor("#ff0000", redColor));
+
+    function selectColor(color, buttonElement) {
+      penColor = color;
+      colorButtons.forEach(btn => btn.classList.remove("active"));
+      buttonElement.classList.add("active");
+    }
+  </script>
+</body>
+</html>
